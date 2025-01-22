@@ -993,15 +993,25 @@ plt.title("MDS plot of SWD-based distances")
 plt.legend()
 plt.show()
 
-# ===========================
-# 3. Basic sanity check
-# ===========================
-with torch.no_grad():
-    z_test = torch.randn(4, 128, device=device)
-    fake_test = G_loaded(z_test, resolution_log2=6)  # 64x64
-print("Fake test shape:", fake_test.shape)  # (4, 1, 64, 64)
-print("Min/Max/Mean:", fake_test.min().item(), fake_test.max().item(), fake_test.mean().item())
-print("Any NaN?", torch.isnan(fake_test).any().item())
+"""## **Conclusions and Future Improvements**
 
-# If everything is good, you should see different min and max (not the same),
-# and "Any NaN?" should be False.
+**Resource Limitations**
+
+* The total training steps were far fewer than typical large-scale GAN experiments, leading to underfitting and less-detailed results. With limited GPU memory and time, effective batch sizes were small, slowing convergence and introducing noisier gradients.
+
+**Progressive Growing Observations**
+
+* While the progressive setup helped the model learn coarse features, each resolution phase (fade-in and stable) would have benefited from more training. Inadequate steps at higher resolutions (32×32 and 64×64) contributed to blocky outputs and incomplete fine details.
+
+**Hyperparameter Sensitivity**
+* GANs are highly sensitive to learning rate, gradient penalty strength, batch size, and Adam β parameters. Here, reducing the learning rate and clipping gradients somewhat stabilized training, but these settings might not be optimal at all resolutions. Adjusting the gradient penalty multiplier (e.g., 1.0 vs. 10.0) can also affect stability and sample diversity.
+
+**Dataset and Diversity**
+* A limited or imbalanced dataset may cause the GAN to produce repetitive or partial patterns. Data augmentation (flips, rotations) helps, but a larger or more varied training set is often necessary to capture subtle geological features. More training images and epochs typically improve diversity and realism.
+
+**Promising Indicators**
+* Despite the blockiness, the model shows recognizable geological-like structures at higher resolutions. The variogram analysis indicates partial capture of spatial continuity, suggesting the GAN is moving in the right direction, albeit still below real-data fidelity.
+
+**Possible Next Steps**
+* Allocating more training iterations at each resolution, tuning hyperparameters (especially per-resolution learning rates and Adam settings), using a bigger subset of real data, and employing more advanced data augmentation are likely avenues for improving the model’s realism and diversity.
+"""
